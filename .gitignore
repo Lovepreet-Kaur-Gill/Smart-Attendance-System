@@ -5,3 +5,4 @@ __pycache__/
 venv/
 env/
 dlib-*.whl
+student_images/
