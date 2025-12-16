@@ -1,11 +1,15 @@
 
 # Database Config
-DB_CONFIG = {
-    "host": "localhost",
-    "user": "root",
-    "password": "Kaurgill@4343#1", 
-    "database": "attendance_db_final"
-}
+import pymysql # type: ignore
+
+def get_db_connection():
+    return pymysql.connect(
+        host="YOUR_CLOUD_HOST_HERE",
+        user="YOUR_USERNAME_HERE",
+        password="YOUR_PASSWORD_HERE", 
+        database="YOUR_DB_NAME",
+        port=3306
+    )
 
 # Email Config
 EMAIL_CONFIG = {

@@ -1,13 +1,11 @@
--- MySQL dump 10.13  Distrib 8.0.43, for Win64 (x86_64)
---
--- Host: localhost    Database: attendance_db_final
+-- MySQL dump for Cloud Deployment
+-- Optimized for compatibility
 -- ------------------------------------------------------
--- Server version	8.0.43
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8 */;
+/*!50503 SET NAMES utf8mb4 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -34,7 +32,7 @@ CREATE TABLE `attendance` (
   PRIMARY KEY (`id`),
   KEY `Roll_No` (`Roll_No`),
   CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`Roll_No`) REFERENCES `student` (`Roll_No`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -71,7 +69,7 @@ CREATE TABLE `student` (
   `Parent_Email` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`Student_ID`),
   UNIQUE KEY `Roll_No` (`Roll_No`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -99,7 +97,7 @@ CREATE TABLE `teacher` (
   `Password` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`Teacher_ID`),
   UNIQUE KEY `Username` (`Username`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -133,7 +131,7 @@ CREATE TABLE `timetable` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_class_slot` (`Year`,`Section`,`Day`,`Time_Start`),
   UNIQUE KEY `unique_teacher_slot` (`Teacher_Username`,`Day`,`Time_Start`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,7 +158,7 @@ CREATE TABLE `user_credentials` (
   `role` varchar(20) DEFAULT 'admin',
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,6 +167,7 @@ CREATE TABLE `user_credentials` (
 
 LOCK TABLES `user_credentials` WRITE;
 /*!40000 ALTER TABLE `user_credentials` DISABLE KEYS */;
+-- NOTE: Default Super Admin is 'root' with password 'root123' based on this dump.
 INSERT INTO `user_credentials` VALUES (1,'admin','admin123','admin'),(2,'abc','abc1','admin'),(3,'root','root123','super_admin');
 /*!40000 ALTER TABLE `user_credentials` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -181,5 +180,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2025-12-11  1:04:33

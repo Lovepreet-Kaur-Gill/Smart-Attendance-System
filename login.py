@@ -4,8 +4,8 @@ from PIL import Image, ImageTk
 import sys
 import subprocess
 import os
-import mysql.connector
 import time
+from config import get_db_connection as connect_to_cloud
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
@@ -24,12 +24,8 @@ class LoginWindow(ctk.CTk):
             self.after(200, lambda: self.iconbitmap("images/app_icon.ico"))
         except: pass
 
-        self.db_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": "Kaurgill@4343#1", 
-            "database": "attendance_db_final"
-        }
+        # --- UPDATE: Hardcoded Local Credentials Hata Diye ---
+        # Ab connection config.py handle karega
         
         self.grid_columnconfigure(0, weight=1) 
         self.grid_columnconfigure(1, weight=1) 
@@ -133,25 +129,44 @@ class LoginWindow(ctk.CTk):
         # Launch Dashboard 
         self.after(100, lambda: self.launch_dashboard(role, user_id, user_name))
 
+    # def launch_dashboard(self, role, user_id, user_name):
+    #     try:
+    #         # Note: Hum ab password pass nahi kar rahe hain kyunki main.py Cloud use karega.
+    #         # Lekin Argument order maintain karne ke liye dummy strings bhej rahe hain.
+            
+    #         subprocess.Popen([
+    #             sys.executable, "main.py", 
+    #             role, 
+    #             str(user_id), 
+    #             "cloud_db_placeholder",  # Dummy DB Name
+    #             "cloud_pass_placeholder", # Dummy Password
+    #             str(user_name)
+    #         ])
+            
+    #         self.after(3000, self.destroy)
+            
+    #     except Exception as e:
+    #         messagebox.showerror("Error", f"Could not open Main File: {e}")
+    #         self.destroy()
     def launch_dashboard(self, role, user_id, user_name):
         try:
-            db_name = self.db_config['database']
-            db_pass = self.db_config['password']
-            
-            subprocess.Popen([
-                sys.executable, "main.py", 
-                role, 
-                str(user_id), 
-                db_name, 
-                db_pass, 
-                str(user_name)
-            ])
-            
-            self.after(3000, self.destroy)
+            # 1. Login Window ko band karein
+            self.destroy()
+
+            # 2. Main Dashboard ko direct import karein
+            from main import MainDashboard
+
+            # 3. Dashboard start karein
+            # Hum wahi arguments pass kar rahe hain jo main.py maangta hai
+            app = MainDashboard(
+                user_role=role, 
+                user_id=str(user_id), 
+                current_user=str(user_name)
+            )
+            app.mainloop()
             
         except Exception as e:
-            messagebox.showerror("Error", f"Could not open Main File: {e}")
-            self.destroy()
+            messagebox.showerror("Error", f"Could not open Dashboard: {e}")
 
     # Login Function
     def login_function(self):
@@ -164,7 +179,8 @@ class LoginWindow(ctk.CTk):
 
         conn = None
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            # --- UPDATE: Using Cloud Connection ---
+            conn = connect_to_cloud()
             cursor = conn.cursor()
             
             # CHECK SUPER ADMIN
@@ -174,6 +190,7 @@ class LoginWindow(ctk.CTk):
             if admin_data:
                 self.show_loading_screen('super_admin', admin_data[0], "Super Admin")
                 return
+            
             # CHECK TEACHER
             cursor.execute("SELECT Teacher_ID, Username FROM teacher WHERE Username=%s AND Password=%s", (username, password))
             teacher_data = cursor.fetchone()
@@ -192,11 +209,10 @@ class LoginWindow(ctk.CTk):
 
             messagebox.showerror("Failed", "Invalid Credentials")
 
-        except mysql.connector.Error as e:
+        except Exception as e:
             messagebox.showerror("Database Error", f"Connection failed: {e}")
         finally:
-            if conn and conn.is_connected():
-                cursor.close()
+            if conn:
                 conn.close()
 
 if __name__ == "__main__":

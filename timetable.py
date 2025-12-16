@@ -1,13 +1,14 @@
 import customtkinter as ctk
 from tkinter import ttk, messagebox
-import mysql.connector
 import sys
+from config import get_db_connection as connect_to_cloud
 
 # Global Variables passed from main.py
 if len(sys.argv) > 4:
-    USER_ROLE, USER_ID, DB_NAME, DB_PASS = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
+    # Role aur ID le rahe hain, DB details ignore kar rahe hain
+    USER_ROLE, USER_ID = sys.argv[1], sys.argv[2]
 else:
-    USER_ROLE, USER_ID, DB_NAME, DB_PASS = "student", "1", "attendance_db_final", "Kaurgill@4343#1"
+    USER_ROLE, USER_ID = "student", "1"
 
 class TimeTableWindow(ctk.CTkToplevel):
     def __init__(self):
@@ -18,13 +19,15 @@ class TimeTableWindow(ctk.CTkToplevel):
         
         self.COLOR_PRIMARY = "#0A2647"
         self.configure(fg_color="#F5F7F9")
-        self.db_config = {"host": "localhost", "user": "root", "password": DB_PASS, "database": DB_NAME}
+        
+        # --- UPDATE: Removed self.db_config (Localhost) ---
 
         self.create_ui()
         self.load_dynamic_timetable()
 
+    # --- UPDATE: Cloud Connection ---
     def get_db_connection(self):
-        return mysql.connector.connect(**self.db_config)
+        return connect_to_cloud()
 
     def create_ui(self):
         header = ctk.CTkFrame(self, fg_color=self.COLOR_PRIMARY, height=70, corner_radius=0)

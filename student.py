@@ -4,24 +4,22 @@ from tkinter import messagebox
 from tkinter import ttk
 from PIL import Image, ImageTk
 import cv2
-import mysql.connector
 import os
 import sys
 import re 
+from config import get_db_connection as connect_to_cloud
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
 
+# Arguments receive kar rahe hain par DB credentials config se lenge
 if len(sys.argv) > 4:
     USER_ROLE = sys.argv[1]
     USER_ID = sys.argv[2]
-    DB_NAME = sys.argv[3]
-    DB_PASS = sys.argv[4]
+    # DB_NAME aur DB_PASS ignore karenge
 else:
     USER_ROLE = "super_admin"
     USER_ID = "1"
-    DB_NAME = "attendance_db_final"
-    DB_PASS = "Kaurgill@4343#1"
 
 class Student(ctk.CTkToplevel):
     def __init__(self):
@@ -41,12 +39,7 @@ class Student(ctk.CTkToplevel):
         self.COLOR_PRIMARY = "#0A2647"
         self.COLOR_SOFT = "#F5F7F9"
         
-        self.db_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": DB_PASS,
-            "database": DB_NAME
-        }
+        # --- UPDATE: Removed self.db_config (Localhost) ---
 
         # capture variables
         self.cap = None  
@@ -92,8 +85,9 @@ class Student(ctk.CTkToplevel):
         self.create_widgets()
         self.fetch_data()
 
+    # --- UPDATE: Cloud Connection ---
     def get_db_connection(self):
-        return mysql.connector.connect(**self.db_config)
+        return connect_to_cloud()
     
     def update_courses(self, choice):
         valid_courses = self.dept_course_map.get(choice, ["Other"])
@@ -145,10 +139,12 @@ class Student(ctk.CTkToplevel):
         self.combo_course.grid(row=1, column=3, padx=15, pady=10, sticky="w")
 
         ctk.CTkLabel(form, text="Year:").grid(row=2, column=0, padx=15, pady=10, sticky="w")
-        self.combo_year = ctk.CTkComboBox(form, variable=self.var_year, values=["2022-23", "2023-24", "2024-25"], width=180).grid(row=2, column=1, padx=15, pady=10, sticky="w")
+        self.combo_year = ctk.CTkComboBox(form, variable=self.var_year, values=["2022-23", "2023-24", "2024-25"], width=180)
+        self.combo_year.grid(row=2, column=1, padx=15, pady=10, sticky="w")
 
         ctk.CTkLabel(form, text="Semester:").grid(row=2, column=2, padx=15, pady=10, sticky="w")
-        self.combo_sem = ctk.CTkComboBox(form, variable=self.var_semester, values=["Semester-1", "Semester-2", "Semester-3", "Semester-4", "Semester-5", "Semester-6"], width=180).grid(row=2, column=3, padx=15, pady=10, sticky="w")
+        self.combo_sem = ctk.CTkComboBox(form, variable=self.var_semester, values=["Semester-1", "Semester-2", "Semester-3", "Semester-4", "Semester-5", "Semester-6"], width=180)
+        self.combo_sem.grid(row=2, column=3, padx=15, pady=10, sticky="w")
 
         ctk.CTkLabel(form, text="Section:").grid(row=3, column=0, padx=15, pady=10, sticky="w")
         self.combo_sec = ctk.CTkComboBox(form, variable=self.var_section, values=["A", "B", "C", "D"], width=180)
@@ -159,7 +155,8 @@ class Student(ctk.CTkToplevel):
         ctk.CTkLabel(form, text="PERSONAL DETAILS", font=("Roboto", 14, "bold"), text_color=self.COLOR_PRIMARY).grid(row=5, column=0, columnspan=4, sticky="w", pady=(0, 15))
 
         ctk.CTkLabel(form, text="Roll No:").grid(row=6, column=0, padx=15, pady=10, sticky="w")
-        ctk.CTkEntry(form, textvariable=self.var_roll, placeholder_text="Unique ID", width=180).grid(row=6, column=1, padx=15, pady=10, sticky="w")
+        self.var_roll_entry = ctk.CTkEntry(form, textvariable=self.var_roll, placeholder_text="Unique ID", width=180)
+        self.var_roll_entry.grid(row=6, column=1, padx=15, pady=10, sticky="w")
         ctk.CTkLabel(form, text="Name:").grid(row=6, column=2, padx=15, pady=10, sticky="w")
         ctk.CTkEntry(form, textvariable=self.var_std_name, width=180).grid(row=6, column=3, padx=15, pady=10, sticky="w")
         ctk.CTkLabel(form, text="DOB (YYYY-MM-DD):").grid(row=7, column=0, padx=15, pady=10, sticky="w")

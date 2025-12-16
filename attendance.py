@@ -1,27 +1,24 @@
 import customtkinter as ctk
 from tkinter import *
 from tkinter import ttk, messagebox, filedialog
-import mysql.connector
 import csv
 import os
 import sys
 from datetime import datetime
+from config import get_db_connection as connect_to_cloud
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
 
-#  Command Line Args for Role, ID, DB_NAME, DB_PASS
+# Command Line Args for Role, ID (DB details ab config.py se ayenge)
 if len(sys.argv) > 4:
     USER_ROLE = sys.argv[1]
     USER_ID = sys.argv[2]
-    DB_NAME = sys.argv[3]
-    DB_PASS = sys.argv[4]
+    # DB_NAME aur DB_PASS ki ab zarurat nahi hai yahan
 else:
     # Testing defaults
     USER_ROLE = "super_admin"  
     USER_ID = "1"            
-    DB_NAME = "attendance_db_final"
-    DB_PASS = "Kaurgill@4343#1"
 
 class AttendanceViewer(ctk.CTkToplevel):
     def __init__(self):
@@ -35,22 +32,14 @@ class AttendanceViewer(ctk.CTkToplevel):
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
             icon_path = os.path.join(script_dir, "images", "app_icon.ico")
-            
             self.iconbitmap(icon_path)
-            
             self.after(200, lambda: self.iconbitmap(icon_path))
-            
         except Exception as e:
             print(f"Icon Error: {e}") 
         
         self.COLOR_PRIMARY = "#0A2647"
         
-        self.db_config = {
-            "host": "localhost", "user": "root",
-            "password": DB_PASS, "database": DB_NAME
-        }
-        
-        # variables for filters
+        # Variables for filters
         self.var_filter_year = ctk.StringVar(value="All")
         self.var_filter_sec = ctk.StringVar(value="All")
         self.var_filter_sem = ctk.StringVar(value="All")
@@ -58,7 +47,6 @@ class AttendanceViewer(ctk.CTkToplevel):
         self.var_filter_teacher = ctk.StringVar(value="All")
         self.var_filter_subject = ctk.StringVar(value="All")
 
-        
         self.current_teacher_name = None
         if USER_ROLE == 'admin':
             self.current_teacher_name = self.get_teacher_name(USER_ID)
@@ -66,8 +54,9 @@ class AttendanceViewer(ctk.CTkToplevel):
         self.create_widgets()
         self.fetch_data()
 
+    # --- CLOUD CONNECTION FUNCTION ---
     def get_db_connection(self):
-        return mysql.connector.connect(**self.db_config)
+        return connect_to_cloud()
 
     def get_teacher_name(self, t_id):
         """Fetch Teacher Username based on Login ID"""
@@ -95,11 +84,10 @@ class AttendanceViewer(ctk.CTkToplevel):
         btn_back = ctk.CTkButton(header, text="← Back", command=self.destroy, width=80, height=30, fg_color="#E74C3C", hover_color="#C0392B")
         btn_back.place(relx=0.02, rely=0.5, anchor="w")
 
-
         title_text = f"MY ATTENDANCE (Roll: {USER_ID})" if USER_ROLE == 'student' else "CLASSROOM ATTENDANCE RECORD"
         ctk.CTkLabel(header, text=title_text, font=("Roboto", 24, "bold"), text_color="white").place(relx=0.5, rely=0.5, anchor="center")
 
-        #    Stats Cards (For Students) 
+        # Stats Cards (For Students) 
         if USER_ROLE == 'student':
             self.stats_frame = ctk.CTkFrame(self, fg_color="white", corner_radius=10)
             self.stats_frame.pack(fill="x", padx=20, pady=15)
@@ -187,7 +175,6 @@ class AttendanceViewer(ctk.CTkToplevel):
         return lbl_value
 
     def on_dept_change(self, choice):
-        """Logic: Jab Dept change ho, tab uss Dept ke Teachers (Usernames) load karo"""
         if choice == "All":
             self.combo_teacher.configure(values=["All"])
             self.var_filter_teacher.set("All")

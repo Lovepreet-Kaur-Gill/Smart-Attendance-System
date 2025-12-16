@@ -4,30 +4,26 @@ from tkinter import messagebox
 from PIL import Image, ImageTk
 import cv2
 import face_recognition # type: ignore
-import mysql.connector
 import os
 import sys
 import pickle
 from datetime import datetime
 import numpy as np
 import math
-
+from config import get_db_connection as connect_to_cloud
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
 
-#global configurations
+# Global configurations (Arguments se Teacher Name uthayenge, DB Pass ignore karenge)
 if len(sys.argv) > 5:
     USER_ROLE = sys.argv[1]
     USER_ID = sys.argv[2]
-    DB_NAME = sys.argv[3]
-    DB_PASS = sys.argv[4]
+    # DB arguments ab ignore honge kyunki config file use ho rahi hai
     TEACHER_NAME = sys.argv[5]
 else:
     USER_ROLE = "admin"
     USER_ID = "1"
-    DB_NAME = "attendance_db_final"
-    DB_PASS = "Kaurgill@4343#1"
     TEACHER_NAME = "Admin"
 
 class FaceRecognitionSystem(ctk.CTkToplevel):
@@ -38,7 +34,6 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
         self.title(f"Liveness Attendance Monitor - {TEACHER_NAME}")
         self.geometry("1000x700") 
         self.after(0, lambda: self.state('zoomed')) 
-
 
         try:
             icon_path = os.path.abspath("images/app_icon.ico")
@@ -53,12 +48,7 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
         
         self.configure(fg_color=self.COLOR_BG)
 
-        self.db_config = {
-            "host": "localhost",
-            "user": "root",
-            "password": DB_PASS,
-            "database": DB_NAME
-        }
+        # --- UPDATE: Removed self.db_config (Localhost) ---
 
         self.is_running = False
         self.cap = None
@@ -78,7 +68,8 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def load_student_data(self):
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            # --- UPDATE: Cloud Connection ---
+            conn = connect_to_cloud()
             cursor = conn.cursor()
             # Fetch all students
             cursor.execute("SELECT Roll_No, Name, Section, Department FROM student")
@@ -175,7 +166,9 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def get_auto_subject(self):
         try:
-            conn = mysql.connector.connect(**self.db_config); cursor = conn.cursor()
+            # --- UPDATE: Cloud Connection ---
+            conn = connect_to_cloud()
+            cursor = conn.cursor()
             now = datetime.now(); day = now.strftime("%A"); ctime = now.strftime("%H:%M:%S")
             
             sql = """SELECT Subject, Department FROM timetable 
@@ -190,7 +183,8 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def mark_attendance(self, roll_no, name):
         try:
-            conn = mysql.connector.connect(**self.db_config)
+            # --- UPDATE: Cloud Connection ---
+            conn = connect_to_cloud()
             cursor = conn.cursor()
             
             student_name = name 

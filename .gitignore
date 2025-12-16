@@ -1,8 +1,8 @@
+# Ignore Output Folder (EXE)
+output/
+build/
+*.spec
 __pycache__/
-.vscode/
 *.pyc
-*.csv
+student_images/*.jpg
 venv/
-env/
-dlib-*.whl
-student_images/

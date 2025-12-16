@@ -3,17 +3,10 @@ import sys
 import customtkinter as ctk
 from tkinter import *
 from tkinter import ttk, messagebox
-import mysql.connector
 import smtplib
 from email.message import EmailMessage
 import threading
-
-# --- IMPORT SETTINGS ---
-try:
-    from config import DB_CONFIG, EMAIL_CONFIG
-except ImportError:
-    DB_CONFIG = {"host": "localhost", "user": "root", "password": "", "database": "attendance_db"}
-    EMAIL_CONFIG = {"sender_email": "test@gmail.com", "sender_password": "pass"}
+from config import get_db_connection as connect_to_cloud, EMAIL_CONFIG
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
@@ -33,7 +26,6 @@ class DefaulterSystem(ctk.CTkToplevel):
         except: pass
         
         self.COLOR_PRIMARY = "#0A2647"
-        self.db_config = DB_CONFIG
         
         self.all_defaulter_data = [] 
         self.current_displayed_data = []
@@ -41,8 +33,9 @@ class DefaulterSystem(ctk.CTkToplevel):
         self.create_ui()
         self.load_defaulters()
 
+    # --- UPDATE: Cloud Connection ---
     def get_db_connection(self):
-        return mysql.connector.connect(**self.db_config)
+        return connect_to_cloud()
 
     def create_ui(self):
         #  HEADER 
@@ -101,7 +94,7 @@ class DefaulterSystem(ctk.CTkToplevel):
         self.lbl_count.pack(pady=5)
 
         self.btn_email = ctk.CTkButton(btn_frame, text="SEND EMAIL TO FILTERED LIST", command=self.confirm_send_emails, 
-                                       fg_color=self.COLOR_PRIMARY, font=("Roboto", 14, "bold"), width=300, height=45)
+                                     fg_color=self.COLOR_PRIMARY, font=("Roboto", 14, "bold"), width=300, height=45)
         self.btn_email.pack()
         self.lbl_status = ctk.CTkLabel(btn_frame, text="Ready.", text_color="gray")
         self.lbl_status.pack(pady=5)

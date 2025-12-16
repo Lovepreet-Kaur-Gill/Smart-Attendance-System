@@ -3,17 +3,17 @@ import customtkinter as ctk
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
-import mysql.connector
 import sys
+from config import get_db_connection as connect_to_cloud
 
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
 
-# Database Credentials
+# Note: DB Credentials ab config.py se handle honge.
+# Sys.argv check hum sirf isliye rakhte hain taaki agar purana launcher use ho toh crash na ho.
 if len(sys.argv) > 4:
-    DB_NAME, DB_PASS = sys.argv[3], sys.argv[4]
-else:
-    DB_NAME, DB_PASS = "attendance_db_final", "Kaurgill@4343#1"
+    # Just accepting args to prevent errors, but won't use them for connection
+    pass
 
 class ManageTimetable(ctk.CTkToplevel):
     def __init__(self):
@@ -32,10 +32,7 @@ class ManageTimetable(ctk.CTkToplevel):
         self.COLOR_PRIMARY = "#0A2647"
         self.COLOR_SOFT = "#F5F7F9"
         
-        self.db_config = {
-            "host": "localhost", "user": "root",
-            "password": DB_PASS, "database": DB_NAME
-        }
+        # --- UPDATE: Removed self.db_config (Localhost) ---
 
         # Variables
         self.var_dept = ctk.StringVar(value="CSE")
@@ -48,13 +45,15 @@ class ManageTimetable(ctk.CTkToplevel):
         self.var_teacher = ctk.StringVar()
         
         self.teacher_list = [] # To store loaded teachers
+        self.selected_id = None # Added missing initialization
         
         self.create_widgets()
         self.load_teachers() # Load teachers into dropdown
         self.fetch_data()
 
+    # --- UPDATE: Cloud Connection ---
     def get_db_connection(self):
-        return mysql.connector.connect(**self.db_config)
+        return connect_to_cloud()
 
     def load_teachers(self):
         try:
@@ -186,10 +185,12 @@ class ManageTimetable(ctk.CTkToplevel):
             self.fetch_data()
             messagebox.showinfo("Success", "Class Assigned Successfully!")
 
-        except mysql.connector.errors.IntegrityError:
-            messagebox.showerror("Schedule Conflict", "CLASH DETECTED!\n\nEither:\n1. This Class already has a subject at this time.\n2. This Teacher is busy in another class at this time.")
         except Exception as e:
-            messagebox.showerror("Error", str(e))
+            # Note: Cloud DB might return IntegrityError slightly differently, catching general exception too
+            if "Duplicate entry" in str(e) or "IntegrityError" in str(e):
+                messagebox.showerror("Schedule Conflict", "CLASH DETECTED!\n\nEither:\n1. This Class already has a subject at this time.\n2. This Teacher is busy in another class at this time.")
+            else:
+                messagebox.showerror("Error", str(e))
 
     def delete_data(self):
         if not self.selected_id:

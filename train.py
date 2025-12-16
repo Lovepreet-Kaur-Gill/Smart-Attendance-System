@@ -13,16 +13,14 @@ ctk.set_appearance_mode("Light")
 ctk.set_default_color_theme("blue")
 
 # Global Config
+# Note: Train module Database use nahi karta, ye sirf Local Images process karta hai.
+# Arguments receive kar rahe hain taaki flow na toote.
 if len(sys.argv) > 4:
     USER_ROLE = sys.argv[1]
     USER_ID = sys.argv[2]
-    DB_NAME = sys.argv[3]
-    DB_PASS = sys.argv[4]
 else:
     USER_ROLE = "super_admin" 
     USER_ID = "1"
-    DB_NAME = "attendance_db_final"
-    DB_PASS = "Kaurgill@4343#1"
 
 # constants
 DATA_DIR = "student_images"

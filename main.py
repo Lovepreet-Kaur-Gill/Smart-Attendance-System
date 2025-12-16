@@ -5,9 +5,9 @@ import os
 import sys
 import subprocess
 import time
-import mysql.connector
 from matplotlib.figure import Figure 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from config import get_db_connection as connect_to_cloud
 
 # importing all modules 
 try:
@@ -34,6 +34,7 @@ class MainDashboard(ctk.CTk):
         self.loader_frame = None 
         self.user_role = user_role.lower()
         self.user_id = user_id        
+        # In variables ki ab connection ke liye zarurat nahi hai, par arguments receive karne ke liye rakha hai
         self.db_name = db_name
         self.db_pass = db_pass
       
@@ -41,9 +42,11 @@ class MainDashboard(ctk.CTk):
         
         self.current_user_logic = "root" 
 
+        # --- UPDATE 1: Cloud Connection for User Details ---
         if self.user_role in ["admin", "super_admin", "teacher"]:
             try:
-                conn = mysql.connector.connect(host="localhost", user="root", password=self.db_pass, database=self.db_name)
+                # Purana Local Connection Hata Diya
+                conn = connect_to_cloud() 
                 cursor = conn.cursor()
                 
                 if self.user_role == "super_admin":
@@ -57,7 +60,8 @@ class MainDashboard(ctk.CTk):
                     if data: self.current_user_logic = data[0] 
 
                 conn.close()
-            except: 
+            except Exception as e: 
+                print(f"User Fetch Error: {e}")
                 pass
 
         # window configuration
@@ -165,7 +169,7 @@ class MainDashboard(ctk.CTk):
             
             footer = ctk.CTkFrame(self.content_container, fg_color="white", corner_radius=15)
             footer.pack(fill="both", expand=True, pady=20, padx=10)
-           
+            
 
         else:
             self.create_dash_card(0, 0, "My Attendance", "Check Report", "#2ecc71", self.open_attendance, self.cards_frame)
@@ -179,7 +183,8 @@ class MainDashboard(ctk.CTk):
 
     def load_student_chart(self, parent):
         try:
-            conn = mysql.connector.connect(host="localhost", user="root", password=self.db_pass, database=self.db_name)
+            # --- UPDATE 2: Cloud Connection for Charts ---
+            conn = connect_to_cloud()
             cursor = conn.cursor()
             query = "SELECT Subject, COUNT(*) FROM attendance WHERE Roll_No=%s AND Status='Present' GROUP BY Subject"
             cursor.execute(query, (self.user_id,))
@@ -206,7 +211,9 @@ class MainDashboard(ctk.CTk):
             canvas = FigureCanvasTkAgg(fig, master=parent)
             canvas.draw()
             canvas.get_tk_widget().pack(fill="both", expand=True, pady=10, padx=20)
-        except: pass
+        except Exception as e:
+            print(f"Chart Error: {e}")
+            pass
 
     def show_loading_screen(self, text="Loading Module..."):
         if self.loader_frame: 
@@ -270,15 +277,19 @@ class MainDashboard(ctk.CTk):
         Contact: 2301301130.lovepreet@geetauniversity.edu
         """
         messagebox.showinfo("Project Info", info)
-
     def logout(self):
         self.show_loading_screen("Logging Out...")
         self.after(1000, self._perform_logout)
 
     def _perform_logout(self):
         try:
-            subprocess.Popen([sys.executable, "login.py"])
             self.destroy()
+
+            from login import LoginWindow
+
+            app = LoginWindow()
+            app.mainloop()
+                
         except Exception as e:
             messagebox.showerror("Error", f"Logout Failed: {e}")
 
@@ -289,7 +300,7 @@ if __name__ == "__main__":
         role, uid, db_n, db_p = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4]
         uname = "Unknown"
     else:
-        role, uid, db_n, db_p, uname = "admin", "0", "attendance_db_final", "Kaurgill@4343#1", "Admin"
+        role, uid, db_n, db_p, uname = "admin", "0", "", "", "Admin"
     
     app = MainDashboard(user_role=role, user_id=uid, db_name=db_n, db_pass=db_p, current_user=uname)
     app.mainloop()
