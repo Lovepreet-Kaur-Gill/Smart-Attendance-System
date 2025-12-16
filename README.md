@@ -1,16 +1,19 @@
-# 📸 Smart Attendance System using Face Recognition
+# 📸 Smart Attendance System using Face Recognition (Cloud Enabled)
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
-![MySQL](https://img.shields.io/badge/Database-MySQL-orange)
+![MySQL](https://img.shields.io/badge/Database-Cloud_MySQL-orange)
 ![CustomTkinter](https://img.shields.io/badge/GUI-CustomTkinter-green)
 ![OpenCV](https://img.shields.io/badge/Computer_Vision-OpenCV-red)
 
 A comprehensive desktop application designed to automate student attendance using Facial Recognition technology. This system replaces manual registers with a secure, digital, and efficient solution.
 
+**🚀 Now powered by Cloud Database:** Data is synced in real-time across all devices (Admin, Teachers, Students) without needing XAMPP/Localhost.
+
 ## 🌟 Key Features
 
 ### 🔐 Admin & Security
 - **Role-Based Login:** Separate dashboards for **Super Admin**, **Teachers**, and **Students**.
+- **Cloud Connectivity:** Database hosted on the cloud, accessible from any computer with the app.
 - **Secure Authentication:** Password-protected access for all modules.
 
 ### 👨‍🏫 For Teachers & Admins
@@ -18,7 +21,7 @@ A comprehensive desktop application designed to automate student attendance usin
 - **Manual Attendance:** Option to manually mark attendance if needed.
 - **Data Management:** Add, Update, or Delete student details and photos.
 - **Live Training:** Train the AI model instantly when new students are added.
-- **Defaulter List:** One-click generation of students with low attendance (<75%).
+- **Defaulter List:** One-click generation of students with low attendance (<75%) and Email Alerts.
 - **Export Data:** Download attendance reports in CSV/Excel format.
 
 ### 🎓 For Students
@@ -28,11 +31,13 @@ A comprehensive desktop application designed to automate student attendance usin
 ## 🛠️ Tech Stack
 - **Language:** Python 3.11
 - **GUI:** CustomTkinter (Modern UI), Tkinter
-- **Database:** MySQL
+- **Database:** MySQL (Clever Cloud / Remote SQL)
 - **Computer Vision:** OpenCV, Dlib, Face_Recognition library
-- **Other Libraries:** Pandas, Pillow, Numpy
+- **Other Libraries:** PyMySQL, Pandas, Pillow, Numpy
 
-## 🚀 How to Run
+## 🚀 How to Run (Source Code)
+
+If you want to run the project from python code:
 
 1. **Clone the Repository**
    ```bash
