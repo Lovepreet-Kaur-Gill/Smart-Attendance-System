@@ -3,16 +3,16 @@ from tkinter import ttk, messagebox
 import sys
 from config import get_db_connection as connect_to_cloud
 
-# Global Variables passed from main.py
-if len(sys.argv) > 4:
-    # Role aur ID le rahe hain, DB details ignore kar rahe hain
-    USER_ROLE, USER_ID = sys.argv[1], sys.argv[2]
-else:
-    USER_ROLE, USER_ID = "student", "1"
+# Note: Global sys.argv logic hata diya hai kyunki ab hum direct import use kar rahe hain.
 
 class TimeTableWindow(ctk.CTkToplevel):
-    def __init__(self):
+    def __init__(self, user_role="student", user_id="1"):
         super().__init__()
+        
+        # --- FIX: Receive Role and ID from Main Dashboard ---
+        self.user_role = user_role
+        self.user_id = user_id
+
         self.title("My Class Schedule")
         self.geometry("1100x500")
         self.after(10, lambda: self.state('zoomed'))
@@ -20,12 +20,9 @@ class TimeTableWindow(ctk.CTkToplevel):
         self.COLOR_PRIMARY = "#0A2647"
         self.configure(fg_color="#F5F7F9")
         
-        # --- UPDATE: Removed self.db_config (Localhost) ---
-
         self.create_ui()
         self.load_dynamic_timetable()
 
-    # --- UPDATE: Cloud Connection ---
     def get_db_connection(self):
         return connect_to_cloud()
 
@@ -36,7 +33,8 @@ class TimeTableWindow(ctk.CTkToplevel):
         btn_back = ctk.CTkButton(header, text="← Back", command=self.destroy, width=80, height=30, fg_color="#E74C3C", hover_color="#C0392B")
         btn_back.place(relx=0.02, rely=0.5, anchor="w")
 
-        ctk.CTkLabel(header, text="WEEKLY TIME TABLE", font=("Roboto", 24, "bold"), text_color="white").place(relx=0.5, rely=0.5, anchor="center")
+        title = f"WEEKLY TIME TABLE (ID: {self.user_id})"
+        ctk.CTkLabel(header, text=title, font=("Roboto", 24, "bold"), text_color="white").place(relx=0.5, rely=0.5, anchor="center")
 
         frame = ctk.CTkFrame(self, fg_color="white")
         frame.pack(fill="both", expand=True, padx=20, pady=20)
@@ -61,19 +59,20 @@ class TimeTableWindow(ctk.CTkToplevel):
             conn = self.get_db_connection()
             cursor = conn.cursor()
             
-            # Fetch Student Details
-            cursor.execute("SELECT Department, Year, Section, Semester FROM student WHERE Roll_No=%s", (USER_ID,))
+            # --- FIX: Use self.user_id instead of global USER_ID ---
+            cursor.execute("SELECT Department, Year, Section, Semester FROM student WHERE Roll_No=%s", (self.user_id,))
             student_data = cursor.fetchone()
             
             if not student_data:
-                messagebox.showerror("Error", "Student record not found.")
+                messagebox.showerror("Error", f"Student record not found for Roll No: {self.user_id}")
+                conn.close()
                 return
             
             dept, year, sec, sem = student_data
             
             self.title(f"Time Table for {dept} - {year} - Sem {sem} - Section {sec}")
             
-            #  Fetch Timetable Data
+            # Fetch Timetable Data
             sql = """SELECT Day, Time_Start, Subject FROM timetable 
                      WHERE Department=%s AND Year=%s AND Section=%s AND Semester=%s
                      ORDER BY FIELD(Day, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday')"""
@@ -81,13 +80,9 @@ class TimeTableWindow(ctk.CTkToplevel):
             cursor.execute(sql, (dept, year, sec, sem))
             rows = cursor.fetchall()
             
-            # 3. Process Data into Grid
+            # Process Data into Grid
             schedule = {day: ["-"] * 7 for day in ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]}
             
-            # Helper to normalize time string (handle "9:00" vs "09:00:00")
-            def normalize_time(t):
-                return str(t)
-
             time_map = {
                 "09:00:00": 0, "9:00:00": 0,
                 "10:00:00": 1,
@@ -104,8 +99,6 @@ class TimeTableWindow(ctk.CTkToplevel):
                 if t_str in time_map:
                     idx = time_map[t_str]
                     schedule[day][idx] = subj
-                else:
-                    print(f"Debug: Time {t_str} not in map") 
             
             for day, slots in schedule.items():
                 row_data = [day] + slots[:4] + ["LUNCH"] + slots[5:]
@@ -119,5 +112,6 @@ class TimeTableWindow(ctk.CTkToplevel):
 if __name__ == "__main__":
     app = ctk.CTk()
     app.withdraw()
-    TimeTableWindow()
+    # Testing purpose only
+    TimeTableWindow(user_role="student", user_id="1") 
     app.mainloop()

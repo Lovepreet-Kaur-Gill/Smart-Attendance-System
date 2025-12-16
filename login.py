@@ -24,9 +24,6 @@ class LoginWindow(ctk.CTk):
             self.after(200, lambda: self.iconbitmap("images/app_icon.ico"))
         except: pass
 
-        # --- UPDATE: Hardcoded Local Credentials Hata Diye ---
-        # Ab connection config.py handle karega
-        
         self.grid_columnconfigure(0, weight=1) 
         self.grid_columnconfigure(1, weight=1) 
         self.grid_rowconfigure(0, weight=1)
@@ -129,35 +126,11 @@ class LoginWindow(ctk.CTk):
         # Launch Dashboard 
         self.after(100, lambda: self.launch_dashboard(role, user_id, user_name))
 
-    # def launch_dashboard(self, role, user_id, user_name):
-    #     try:
-    #         # Note: Hum ab password pass nahi kar rahe hain kyunki main.py Cloud use karega.
-    #         # Lekin Argument order maintain karne ke liye dummy strings bhej rahe hain.
-            
-    #         subprocess.Popen([
-    #             sys.executable, "main.py", 
-    #             role, 
-    #             str(user_id), 
-    #             "cloud_db_placeholder",  # Dummy DB Name
-    #             "cloud_pass_placeholder", # Dummy Password
-    #             str(user_name)
-    #         ])
-            
-    #         self.after(3000, self.destroy)
-            
-    #     except Exception as e:
-    #         messagebox.showerror("Error", f"Could not open Main File: {e}")
-    #         self.destroy()
     def launch_dashboard(self, role, user_id, user_name):
         try:
-            # 1. Login Window ko band karein
             self.destroy()
-
-            # 2. Main Dashboard ko direct import karein
             from main import MainDashboard
 
-            # 3. Dashboard start karein
-            # Hum wahi arguments pass kar rahe hain jo main.py maangta hai
             app = MainDashboard(
                 user_role=role, 
                 user_id=str(user_id), 
@@ -179,10 +152,8 @@ class LoginWindow(ctk.CTk):
 
         conn = None
         try:
-            # --- UPDATE: Using Cloud Connection ---
             conn = connect_to_cloud()
             cursor = conn.cursor()
-            
             # CHECK SUPER ADMIN
             cursor.execute("SELECT id, username FROM user_credentials WHERE username=%s AND password=%s AND role='super_admin'", (username, password))
             admin_data = cursor.fetchone()

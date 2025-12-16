@@ -1,9 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
-from PIL import Image, ImageTk
 import os
 import sys
-import subprocess
 import time
 from matplotlib.figure import Figure 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -34,18 +32,16 @@ class MainDashboard(ctk.CTk):
         self.loader_frame = None 
         self.user_role = user_role.lower()
         self.user_id = user_id        
-        # In variables ki ab connection ke liye zarurat nahi hai, par arguments receive karne ke liye rakha hai
         self.db_name = db_name
         self.db_pass = db_pass
       
-        self.current_user_display = current_user 
+        # --- FIX: Standardized variable name here ---
+        self.current_user = current_user 
         
         self.current_user_logic = "root" 
 
-        # --- UPDATE 1: Cloud Connection for User Details ---
         if self.user_role in ["admin", "super_admin", "teacher"]:
             try:
-                # Purana Local Connection Hata Diya
                 conn = connect_to_cloud() 
                 cursor = conn.cursor()
                 
@@ -120,7 +116,8 @@ class MainDashboard(ctk.CTk):
         header = ctk.CTkFrame(self.main_view, height=70, fg_color="white", corner_radius=0)
         header.pack(fill="x")
         
-        title_text = f"Welcome, {self.current_user_display}" if self.user_role != "student" else f"Student Dashboard (Roll: {self.user_id})"
+        # --- FIX: Using self.current_user here ---
+        title_text = f"Welcome, {self.current_user}" if self.user_role != "student" else f"Student Dashboard (Roll: {self.user_id})"
         ctk.CTkLabel(header, text=title_text, font=("Roboto", 24, "bold"), text_color="#333").pack(side="left", padx=30)
         self.time_label = ctk.CTkLabel(header, text="00:00", font=("Roboto Mono", 16), text_color=self.c_navy)
         self.time_label.pack(side="right", padx=30)
@@ -253,10 +250,26 @@ class MainDashboard(ctk.CTk):
     
     def open_face_recognition(self): self.open_window(FaceRecognitionSystem, self.current_user_logic)
     
-    def open_attendance(self): self.open_window(AttendanceViewer)
+    def open_attendance(self):
+        try:
+            # --- FIX: This will now work because self.current_user exists ---
+            app = AttendanceViewer(
+                user_role=self.user_role, 
+                user_id=self.user_id, 
+                current_user=self.current_user
+            )
+            app.mainloop()
+        except Exception as e: messagebox.showerror("Error", str(e))
     def open_train_data(self): self.open_window(TrainWindow)
     def open_defaulter(self): self.open_window(DefaulterSystem)
-    def open_timetable(self): self.open_window(TimeTableWindow) 
+    def open_timetable(self):
+        try:
+            app = TimeTableWindow(
+                user_role=self.user_role, 
+                user_id=self.user_id
+            )
+            app.mainloop()
+        except Exception as e: messagebox.showerror("Error", str(e))
     def open_teacher_reg(self): self.open_window(TeacherManagement)
     def open_manage_timetable(self): self.open_window(ManageTimetable)
     

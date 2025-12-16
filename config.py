@@ -4,10 +4,10 @@ import pymysql # type: ignore
 
 def get_db_connection():
     return pymysql.connect(
-        host="YOUR_CLOUD_HOST_HERE",
-        user="YOUR_USERNAME_HERE",
-        password="YOUR_PASSWORD_HERE", 
-        database="YOUR_DB_NAME",
+        host="bwmuy19rmyneoudpdoiz-mysql.services.clever-cloud.com",
+        user= "uuzigjqx0sdqftxw",
+        password= "D4wntDqB8Q7eSBggYRon",
+        database="bwmuy19rmyneoudpdoiz",
         port=3306
     )
 

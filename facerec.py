@@ -15,11 +15,9 @@ from config import get_db_connection as connect_to_cloud
 ctk.set_appearance_mode("Light") 
 ctk.set_default_color_theme("blue")
 
-# Global configurations (Arguments se Teacher Name uthayenge, DB Pass ignore karenge)
 if len(sys.argv) > 5:
     USER_ROLE = sys.argv[1]
     USER_ID = sys.argv[2]
-    # DB arguments ab ignore honge kyunki config file use ho rahi hai
     TEACHER_NAME = sys.argv[5]
 else:
     USER_ROLE = "admin"
@@ -48,8 +46,6 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
         
         self.configure(fg_color=self.COLOR_BG)
 
-        # --- UPDATE: Removed self.db_config (Localhost) ---
-
         self.is_running = False
         self.cap = None
         self.known_encodings = []
@@ -68,13 +64,10 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def load_student_data(self):
         try:
-            # --- UPDATE: Cloud Connection ---
             conn = connect_to_cloud()
             cursor = conn.cursor()
-            # Fetch all students
             cursor.execute("SELECT Roll_No, Name, Section, Department FROM student")
             rows = cursor.fetchall()
-            # Storing as dictionary
             for r in rows: 
                 self.student_map[r[0]] = {"name": r[1], "section": r[2], "dept": r[3]}
             conn.close()
@@ -166,7 +159,6 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def get_auto_subject(self):
         try:
-            # --- UPDATE: Cloud Connection ---
             conn = connect_to_cloud()
             cursor = conn.cursor()
             now = datetime.now(); day = now.strftime("%A"); ctime = now.strftime("%H:%M:%S")
@@ -183,7 +175,6 @@ class FaceRecognitionSystem(ctk.CTkToplevel):
 
     def mark_attendance(self, roll_no, name):
         try:
-            # --- UPDATE: Cloud Connection ---
             conn = connect_to_cloud()
             cursor = conn.cursor()
             
